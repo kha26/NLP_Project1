@@ -4,19 +4,18 @@ import random
 startingWord = '<s>';
 endingWord = '.';
 
+## ===== PREPROCESSING ==========
+def preprocessText(text):
+    text = text.lower();
+    return text;
+
 ## ===== GENERATE TABLES =======================================================
 def unigramTable(text):
     data = text.split(' ');
-    size = len(data);
     data = dict(Counter(data)); # Calculate no. occurences of each word
-    #if callable(smoothing):
-        #data = smoothing(data);
-    for key, value in data.items():
-        data[key] = (float) (value) / size; # Calculate prob of each word
     return data;
 
 def bigramTable(text):
-    text = text.lower();
     data = text.split(' ');
     size = len(data);
     wordCount = dict(Counter(data)); # Calculate no. occurences of each word
@@ -39,11 +38,20 @@ def bigramTable(text):
                     bigramData[prevWord][word] = 1;
             else:
                 bigramData[prevWord] = { word : 1 }
+    return (wordCount, bigramData);
+
+def unigramProbTable(data):
+    size = sum(data.values());
+    for key, value in data.items():
+        data[key] = (float) (value) / size; # Calculate prob of each word
+    return data;
+
+def bigramProbTable(data, bigramData):
     for prevWord, possibleWords in bigramData.items():
         for nextWord, value in possibleWords.items():
-            possibleWords[nextWord] = (float) (value) / wordCount[prevWord]
-
+            possibleWords[nextWord] = (float) (value) / data[prevWord]
     return bigramData;
+
 
 ## ===== GENERATE RANDOM SENTENCE ==============================================
 def pickRandomWord(data):
@@ -76,7 +84,7 @@ def generateBiSentence(length, data):
             prevWord = nextWord;
     return sentence;
 
-## ===== ADD ONE SMOOTHING =====================================================
+## ===== ADD SMOOTHING =====================================================
 # def addOneSmoothingUnigram(data):
 
 
@@ -85,16 +93,20 @@ if __name__ == '__main__':
     f = open('Assignment1_resources/development/trump.txt', 'r');
     if f.mode == 'r':
         contents = f.read();
-        # contents = 'the students liked the assignment . the rowing is fun .';
+        contents = 'the students liked the assignment .';
+
+        contents = preprocessText(contents);
 
         print('========== UNIGRAM ========== ');
         tableUnigram = unigramTable(contents);
-        #print(tableUnigram);
-        print(generateUniSentence(50, tableUnigram));
+        tableUnigram = unigramProbTable(tableUnigram);
+        print(tableUnigram);
+        print(generateUniSentence(5, tableUnigram));
 
         print('========== BIGRAM  ========== ');
-        tableBigram = bigramTable(contents);
-        #print(tableBigram);
-        print(generateBiSentence(50, tableBigram));
+        (wordCount, tableBigram) = bigramTable(contents);
+        tableBigram = bigramProbTable(wordCount, tableBigram);
+        print(tableBigram);
+        print(generateBiSentence(5, tableBigram));
     else:
         print('Something went wrong bro!');
