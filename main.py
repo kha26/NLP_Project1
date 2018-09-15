@@ -42,15 +42,18 @@ def bigramTable(text):
 
 def unigramProbTable(data):
     size = sum(data.values());
+    table = {}
     for key, value in data.items():
-        data[key] = (float) (value) / size; # Calculate prob of each word
-    return data;
+        table[key] = (float) (value) / size; # Calculate prob of each word
+    return table;
 
 def bigramProbTable(data, bigramData):
+    table = {}
     for prevWord, possibleWords in bigramData.items():
+        table[prevWord] = {}
         for nextWord, value in possibleWords.items():
-            possibleWords[nextWord] = (float) (value) / data[prevWord]
-    return bigramData;
+            table[prevWord][nextWord] = (float) (value) / data[prevWord]
+    return table;
 
 
 ## ===== GENERATE RANDOM SENTENCE ==============================================
@@ -87,7 +90,12 @@ def generateBiSentence(length, data):
 ## ===== ADD SMOOTHING =====================================================
 # def addOneSmoothingUnigram(data):
 
-
+##Modified KneserNey Smoothing
+#We expect the contents of unigrams to be a dictionary, containing Strings: counts
+#We expect the contents of bigrams to be a dictionary of dictionaries, containing a mapping of String:Count
+def modifiedKneserNey(unigrams, bigrams):
+    print(unigrams)
+    print(bigrams)
 
 if __name__ == '__main__':
     f = open('Assignment1_resources/development/trump.txt', 'r');
@@ -98,15 +106,18 @@ if __name__ == '__main__':
         contents = preprocessText(contents);
 
         print('========== UNIGRAM ========== ');
-        tableUnigram = unigramTable(contents);
-        tableUnigram = unigramProbTable(tableUnigram);
-        print(tableUnigram);
-        print(generateUniSentence(5, tableUnigram));
+        unigramData = unigramTable(contents);
+        print(unigramData)
+        tableUnigram = unigramProbTable(unigramData);
+        print(tableUnigram)
 
         print('========== BIGRAM  ========== ');
-        (wordCount, tableBigram) = bigramTable(contents);
-        tableBigram = bigramProbTable(wordCount, tableBigram);
-        print(tableBigram);
-        print(generateBiSentence(5, tableBigram));
+        (wordCount, bigramData) = bigramTable(contents);
+        print(bigramData)
+        tableBigram = bigramProbTable(wordCount, bigramData);
+        print(tableBigram)
+
+        print('===Modified Kneser-Ney===')
+        modifiedKneserNey(unigramData, bigramData)
     else:
         print('Something went wrong bro!');
