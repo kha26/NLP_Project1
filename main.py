@@ -7,6 +7,14 @@ endingWord = '.';
 ## ===== PREPROCESSING ==========
 def preprocessText(text):
     text = text.lower();
+    text = text.replace(' ``', ''); # Get rid of ``
+    text = text.replace(' \'\'', ''); # Get rid of ''
+    text = text.replace(' “', ''); # Get rid of “
+    text = text.replace(' ”', ''); # Get rid of ”
+
+    text = text.replace(' \'', '\''); # it 's => it's, teachers ' => teachers'
+    text = text.replace(' ’ ', '’'); # can ’ t => can’t
+    # text = text.replace(' n\'', 'n\''); # did n't => didn't
     return text;
 
 ## ===== GENERATE TABLES =======================================================
