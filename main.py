@@ -31,9 +31,11 @@ def bigramTable(text):
     wordCount = dict(Counter(data)); # Calculate no. occurences of each word
     wordCount[startingWord] = 1;
     bigramData = {};
+    continuation = {}
     for x in range(0, size): # Iterate through every word
         if (x == 0):
             bigramData[startingWord] = { data[x] : 1 };
+            continuation[data[x]] = 1
         else:
             prevWord = data[x-1];
             if prevWord == endingWord:
@@ -46,9 +48,18 @@ def bigramTable(text):
                     bigramData[prevWord][word] += 1;
                 else:
                     bigramData[prevWord][word] = 1;
+                    if word in continuation:
+                        continuation[word] = continuation[word] + 1
+                    else:
+                        continuation[word] = 1
             else:
                 bigramData[prevWord] = { word : 1 }
-    return (wordCount, bigramData);
+                if word in continuation:
+                    continuation[word] = continuation[word] + 1
+                else:
+                    continuation[word] = 1
+
+    return (wordCount, bigramData), continuation;
 
 def unigramProbTable(data):
     size = sum(data.values());
@@ -100,12 +111,30 @@ def generateBiSentence(length, data):
 ## ===== ADD SMOOTHING =====================================================
 # def addOneSmoothingUnigram(data):
 
-##Modified KneserNey Smoothing
+##KneserNey Smoothing
 #We expect the contents of unigrams to be a dictionary, containing Strings: counts
 #We expect the contents of bigrams to be a dictionary of dictionaries, containing a mapping of String:Count
-def modifiedKneserNey(unigrams, bigrams):
-    print(unigrams)
-    print(bigrams)
+#We expect the contents of continuation to be a dictionary mapping stirngs to int, containing the number of unique bigrams the string is the second token of
+def kneserNey(unigrams, bigrams, continuation):
+    discount = 0.75
+    print(continuation)
+    numBigramTypes = float(sum(continuation.itervalues()))
+    newProbabilities = {}
+
+    for bigramToken, dictionaries in bigrams.iteritems():
+        newProbabilities[bigramToken] = {}
+        countPrev = sum(dictionaries.itervalues())
+        lmbda = discount/ countPrev * len(dictionaries)
+        for token in unigrams:
+            if token in dictionaries:
+                count = dictionaries[token]
+            else:
+                count = 0
+            discountedProbability = max(count - discount, 0)/countPrev
+            continuationValue = continuation[token] / numBigramTypes
+            newProbabilities[bigramToken][token] = discountedProbability + lmbda * continuationValue
+    print(newProbabilities)
+    return newProbabilities
 
 ## ===== PERPLEXITY ========================================================
 ##Expect modelData to be a dictionary of word: probability
@@ -147,13 +176,13 @@ if __name__ == '__main__':
         print(tableUnigram)
 
         print('========== BIGRAM  ========== ');
-        (wordCount, bigramData) = bigramTable(contents);
+        (wordCount, bigramData), continuation = bigramTable(contents);
         print(bigramData)
         tableBigram = bigramProbTable(wordCount, bigramData);
         print(tableBigram)
 
         print('===Modified Kneser-Ney===')
-        modifiedKneserNey(unigramData, bigramData)
+        kneserNey(unigramData, bigramData, continuation)
 
         print('==========PERPLEXITY==============')
         evaluate(tableUnigram, tableBigram)
