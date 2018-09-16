@@ -117,7 +117,6 @@ def generateBiSentence(length, data):
 #We expect the contents of continuation to be a dictionary mapping stirngs to int, containing the number of unique bigrams the string is the second token of
 def kneserNey(unigrams, bigrams, continuation):
     discount = 0.75
-    print(continuation)
     numBigramTypes = float(sum(continuation.itervalues()))
     newProbabilities = {}
 
@@ -154,8 +153,8 @@ def flatten(bigrams):
     return flattenedBigrams
 
 def evaluate(unigram, bigrams):
-    unigramPP = perplexity(tableUnigram)
-    bigramPP = perplexity(flatten(tableBigram))
+    unigramPP = perplexity(unigram)
+    bigramPP = perplexity(flatten(bigrams))
     print("UNIGRAM: " + str(unigramPP))
     print("BIGRAM: " + str(bigramPP))
 
@@ -165,8 +164,7 @@ if __name__ == '__main__':
     f = open('Assignment1_resources/development/trump.txt', 'r');
     if f.mode == 'r':
         contents = f.read();
-        contents = 'the students liked the assignment .';
-
+      #  contents = "the students liked the assignment ."
         contents = preprocessText(contents);
 
         print('========== UNIGRAM ========== ');
@@ -182,10 +180,10 @@ if __name__ == '__main__':
         print(tableBigram)
 
         print('===Modified Kneser-Ney===')
-        kneserNey(unigramData, bigramData, continuation)
+        kN = kneserNey(unigramData, bigramData, continuation)
 
         print('==========PERPLEXITY==============')
         evaluate(tableUnigram, tableBigram)
-
+        evaluate(tableUnigram, kN)
     else:
         print('Something went wrong bro!');
