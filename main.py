@@ -1,5 +1,7 @@
+#coding=iso-8859-1
 from collections import Counter
 import random
+import math
 
 startingWord = '<s>';
 endingWord = '.';
@@ -105,6 +107,31 @@ def modifiedKneserNey(unigrams, bigrams):
     print(unigrams)
     print(bigrams)
 
+## ===== PERPLEXITY ========================================================
+##Expect modelData to be a dictionary of word: probability
+def perplexity(modelData):
+    logSum = 0
+    numOfWords = len(modelData)
+    for probability in modelData.values():
+        logSum -= math.log(probability)
+    perplexity = math.exp(logSum/float(numOfWords))
+    return perplexity
+
+def flatten(bigrams):
+    flattenedBigrams = {}
+    for word, nextWordProbs in bigrams.items():
+        for nextWord, prob in nextWordProbs.items():
+            flattenedBigrams[nextWord] = prob
+    return flattenedBigrams
+
+def evaluate(unigram, bigrams):
+    unigramPP = perplexity(tableUnigram)
+    bigramPP = perplexity(flatten(tableBigram))
+    print("UNIGRAM: " + str(unigramPP))
+    print("BIGRAM: " + str(bigramPP))
+
+
+
 if __name__ == '__main__':
     f = open('Assignment1_resources/development/trump.txt', 'r');
     if f.mode == 'r':
@@ -127,5 +154,9 @@ if __name__ == '__main__':
 
         print('===Modified Kneser-Ney===')
         modifiedKneserNey(unigramData, bigramData)
+
+        print('==========PERPLEXITY==============')
+        evaluate(tableUnigram, tableBigram)
+
     else:
         print('Something went wrong bro!');
