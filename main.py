@@ -117,22 +117,22 @@ def generateBiSentence(length, data):
 #We expect the contents of continuation to be a dictionary mapping stirngs to int, containing the number of unique bigrams the string is the second token of
 def kneserNey(unigrams, bigrams, continuation):
     discount = 0.75
-    numBigramTypes = float(sum(continuation.itervalues()))
+    totalBigramTypes = float(sum(continuation.itervalues()))
     newProbabilities = {}
 
-    for bigramToken, dictionaries in bigrams.iteritems():
+    for bigramToken, dictionaries in bigrams.iteritems():           #BigramToken is w_(i-1)
         newProbabilities[bigramToken] = {}
-        countPrev = sum(dictionaries.itervalues())
-        lmbda = discount/ countPrev * len(dictionaries)
-        for token in unigrams:
-            if token in dictionaries:
+        countPrev = sum(dictionaries.itervalues())                  #Get the number of total bigrams, this is effectively a count of w_(i-1)
+        lmbda = discount/ countPrev * len(dictionaries)             #Lambda = d / c(w_i-1) *
+        for token in unigrams:                                      #We want to do this for every single token, because we want to give every single token some positive probability.
+            if token in dictionaries:                               #If it's in the dictionary, then it has a value. Otherwise, its 0
                 count = dictionaries[token]
             else:
                 count = 0
-            discountedProbability = max(count - discount, 0)/countPrev
-            continuationValue = continuation[token] / numBigramTypes
+            discountedProbability = max(count - discount, 0)/countPrev  #our discounted value is the c(w_i-1, w_i) - d / c(w_i-1)
+            continuationValue = continuation[token] / totalBigramTypes    #Continuation should be the number of times w has appeared in unique bigrams (found in the continuation) / Total number of bigram types
             newProbabilities[bigramToken][token] = discountedProbability + lmbda * continuationValue
-    print(newProbabilities)
+  #  print(newProbabilities)
     return newProbabilities
 
 ## ===== PERPLEXITY ========================================================
@@ -161,10 +161,10 @@ def evaluate(unigram, bigrams):
 
 
 if __name__ == '__main__':
-    f = open('Assignment1_resources/development/trump.txt', 'r');
+    f = open('Assignment1_resources/development/obama.txt', 'r');
     if f.mode == 'r':
         contents = f.read();
-      #  contents = "the students liked the assignment ."
+    #    contents = "the students liked the assignment ."
         contents = preprocessText(contents);
 
         print('========== UNIGRAM ========== ');
