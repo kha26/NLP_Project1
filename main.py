@@ -160,7 +160,7 @@ def perplexity(testWords, trainedModel):
     for word in testWords:
         if word in trainedModel:
             logSum -= math.log(trainedModel[word])
-        else
+        else:
             logSum -= math.log(trainedModel['<unk>'])
     perplexity = math.exp(logSum/(float(n)))
     return perplexity
@@ -181,38 +181,37 @@ def evaluate(unigram, bigrams):
 
 
 if __name__ == '__main__':
-    f = open('Assignment1_resources/development/trump.txt', 'r');
-    if f.mode == 'r':
-        contents = f.read();
-        # contents = "the students the the students ."
-        contents = preprocessText(contents);
-        tokens = contents.split(' ');
+    devFile = open('Assignment1_resources/development/obama.txt', 'r');
+    trainFile = open('Assignment1_resources/train/obama.txt', 'r');
+    if trainFile.mode == 'r' and devFile.mode == 'r':
+        devText = devFile.read();
+        trainText = trainFile.read();
 
-        print('========== UNSMOOTHENED UNIGRAM ========== ');
-        unigramData = unigramTable(tokens);
-        tableUnigram = unigramProbTable(unigramData);
-        print(generateUniSentence(20, tableUnigram));
+        dev = preprocessText(devText);
+        train = convertUnkownWords(preprocessText(trainText));
 
-        print('========== UNSMOOTHENED BIGRAM ========== ');
-        (wordCount, bigramData), continuation = bigramTable(tokens);
-        tableBigram = bigramProbTable(wordCount, bigramData);
-        print(generateBiSentence(20, tableBigram));
+        # contents = 'the students liked the assignment .';
 
-        tokens = convertUnkownWords(contents);
+        # contents = preprocessText(devText);
 
         print('========== UNIGRAM ========== ');
-        unigramData = unigramTable(tokens);
+        unigramData = unigramTable(train);
+        #print(unigramData)
         tableUnigram = unigramProbTable(unigramData);
+        print(tableUnigram)
 
         print('========== BIGRAM  ========== ');
-        (wordCount, bigramData), continuation = bigramTable(tokens);
+        (wordCount, bigramData) = bigramTable(train);
+        # print(bigramData)
         tableBigram = bigramProbTable(wordCount, bigramData);
+        print(tableBigram)
 
         print('===Modified Kneser-Ney===')
-        kN = kneserNey(unigramData, bigramData, continuation)
+        # modifiedKneserNey(unigramData, bigramData)
 
         print('==========PERPLEXITY==============')
-        evaluate(tableUnigram, tableBigram)
-        evaluate(tableUnigram, kN)
+        print(round(perplexity(dev.split(' '), tableUnigram), 2))
+
+
     else:
         print('Something went wrong bro!');
