@@ -144,12 +144,15 @@ def kneserNey(unigrams, bigrams, continuation):
 
 ## ===== PERPLEXITY ========================================================
 ##Expect modelData to be a dictionary of word: probability
-def perplexity(modelData):
+def perplexity(testWords, trainedModel):
     logSum = 0
-    numOfWords = len(modelData)
-    for probability in modelData.values():
-        logSum -= math.log(probability)
-    perplexity = math.exp(logSum/float(numOfWords))
+    n = len(testWords)
+    for word in testWords:
+        if word in trainedModel:
+            logSum -= math.log(trainedModel[word])
+        else
+            logSum -= math.log(trainedModel['<unk>'])
+    perplexity = math.exp(logSum/(float(n)))
     return perplexity
 
 def flatten(bigrams):
