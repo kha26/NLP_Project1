@@ -5,6 +5,7 @@ import math
 
 startingWord = '<s>';
 endingWord = '.';
+unknownWord = '<unk>';
 
 ## ===== PREPROCESSING ==========
 def preprocessText(text):
@@ -20,13 +21,11 @@ def preprocessText(text):
     return text;
 
 ## ===== GENERATE TABLES =======================================================
-def unigramTable(text):
-    data = text.split(' ');
+def unigramTable(data):
     data = dict(Counter(data)); # Calculate no. occurences of each word
     return data;
 
-def bigramTable(text):
-    data = text.split(' ');
+def bigramTable(data):
     size = len(data);
     wordCount = dict(Counter(data)); # Calculate no. occurences of each word
     wordCount[startingWord] = 1;
@@ -109,6 +108,14 @@ def generateBiSentence(length, data):
     return sentence;
 
 ## ===== ADD SMOOTHING =====================================================
+def convertUnkownWords(text):
+    data = text.split(' ');
+    unknowns = {};
+    for i in range(0, len(data)):
+        if not(data[i] in unknowns):
+            unknowns[data[i]] = 1;
+            data[i] = unknownWord;
+    return data;
 # def addOneSmoothingUnigram(data):
 
 ##KneserNey Smoothing
@@ -161,23 +168,32 @@ def evaluate(unigram, bigrams):
 
 
 if __name__ == '__main__':
-    f = open('Assignment1_resources/development/obama.txt', 'r');
+    f = open('Assignment1_resources/development/trump.txt', 'r');
     if f.mode == 'r':
         contents = f.read();
-    #    contents = "the students liked the assignment ."
+        # contents = "the students the the students ."
         contents = preprocessText(contents);
+        tokens = contents.split(' ');
+
+        print('========== UNSMOOTHENED UNIGRAM ========== ');
+        unigramData = unigramTable(tokens);
+        tableUnigram = unigramProbTable(unigramData);
+        print(generateUniSentence(20, tableUnigram));
+
+        print('========== UNSMOOTHENED BIGRAM ========== ');
+        (wordCount, bigramData), continuation = bigramTable(tokens);
+        tableBigram = bigramProbTable(wordCount, bigramData);
+        print(generateBiSentence(20, tableBigram));
+
+        tokens = convertUnkownWords(contents);
 
         print('========== UNIGRAM ========== ');
-        unigramData = unigramTable(contents);
-        print(unigramData)
+        unigramData = unigramTable(tokens);
         tableUnigram = unigramProbTable(unigramData);
-        print(tableUnigram)
 
         print('========== BIGRAM  ========== ');
-        (wordCount, bigramData), continuation = bigramTable(contents);
-        print(bigramData)
+        (wordCount, bigramData), continuation = bigramTable(tokens);
         tableBigram = bigramProbTable(wordCount, bigramData);
-        print(tableBigram)
 
         print('===Modified Kneser-Ney===')
         kN = kneserNey(unigramData, bigramData, continuation)
