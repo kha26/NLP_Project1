@@ -116,7 +116,26 @@ def convertUnkownWords(text):
             unknowns[data[i]] = 1;
             data[i] = unknownWord;
     return data;
-# def addOneSmoothingUnigram(data):
+
+def addK(unigrams, bigrams, count):
+    result = {}
+    print(unigrams)
+    for first, _ in unigrams.iteritems():
+        result[first] = {}
+        for second, _ in unigrams.iteritems():
+            if first in bigrams:
+                dictionary = bigrams[first]
+            else:
+                dictionary = {}
+
+            if second in dictionary:
+                result[first][second] = dictionary[second]+count
+            else:
+                result[first][second] = count
+        count = float(sum(result[first].values()))
+        for value in result[first]:
+            result[first][value] = result[first][value]/count;
+    return result
 
 ##KneserNey Smoothing
 #We expect the contents of unigrams to be a dictionary, containing Strings: counts
@@ -127,11 +146,7 @@ def kneserNey(unigrams, bigrams, continuation):
     totalBigramTypes = float(sum(continuation.itervalues()))
     newProbabilities = {}
 
-    for bigramToken, _ in unigrams.iteritems():           #BigramToken is w_(i-1)
-        if bigramToken in bigrams:
-            dictionaries = bigrams[bigramData]
-        else:
-            dictionaries = {}
+    for bigramToken, dictionaries in bigrams.iteritems():           #BigramToken is w_(i-1)
         newProbabilities[bigramToken] = {}
         countPrev = sum(dictionaries.itervalues())                  #Get the number of total bigrams, this is effectively a count of w_(i-1)
         lmbda = discount/ countPrev * len(dictionaries)             #Lambda = d / c(w_i-1) *
@@ -145,11 +160,6 @@ def kneserNey(unigrams, bigrams, continuation):
             newProbabilities[bigramToken][token] = discountedProbability + lmbda * continuationValue
   #  print(newProbabilities)
     return newProbabilities
-
-
-def addK(unigrams, bigrams):
-    for bigram in unigrams:
-        print(bigram)
 
 
 ## ===== PERPLEXITY ========================================================
@@ -198,20 +208,19 @@ if __name__ == '__main__':
         unigramData = unigramTable(train);
         #print(unigramData)
         tableUnigram = unigramProbTable(unigramData);
-        print(tableUnigram)
+        #print(tableUnigram)
 
         print('========== BIGRAM  ========== ');
-        (wordCount, bigramData) = bigramTable(train);
+        (wordCount, bigramData), continuation = bigramTable(train);
         # print(bigramData)
         tableBigram = bigramProbTable(wordCount, bigramData);
-        print(tableBigram)
+        #print(tableBigram)
 
-        print('===Modified Kneser-Ney===')
-        # modifiedKneserNey(unigramData, bigramData)
-
-        print('==========PERPLEXITY==============')
-        print(round(perplexity(dev.split(' '), tableUnigram), 2))
-
-
+        print('======Add-K=====')
+        addOne = addK(unigramData, bigramData, 1)
+        print('======Kneser-Ney======')
+        kN = kneserNey(unigramData, bigramData, continuation)
+        #print(kN)      You definitely do not want to print this, perhaps pipe it out to a file instead.
+        print('Done')
     else:
         print('Something went wrong bro!');
