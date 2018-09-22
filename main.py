@@ -216,6 +216,12 @@ if __name__ == '__main__':
         tableBigram = bigramProbTable(wordCount, bigramData);
         #print(tableBigram)
 
+#Example
+        print(unigramData['.'])
+        print(bigramData['<s>'])
+        print(sum(bigramData['<s>'].values()))
+        print(bigramData['.'])      #Fails here
+
         print('======Add-K=====')
         addOne = addK(unigramData, bigramData, 1)
         print('======Kneser-Ney======')
