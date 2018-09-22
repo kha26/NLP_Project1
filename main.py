@@ -178,7 +178,7 @@ if __name__ == '__main__':
         trainText = trainFile.read();
 
         dev = preprocessText(devText);
-        train = preprocessText(trainText);
+        train = convertUnkownWords(preprocessText(trainText));
 
         # contents = 'the students liked the assignment .';
 
@@ -186,9 +186,9 @@ if __name__ == '__main__':
 
         print('========== UNIGRAM ========== ');
         unigramData = unigramTable(train);
-        # print(unigramData)
+        #print(unigramData)
         tableUnigram = unigramProbTable(unigramData);
-        # print(tableUnigram)
+        print(tableUnigram)
 
         print('========== BIGRAM  ========== ');
         (wordCount, bigramData) = bigramTable(train);
