@@ -127,7 +127,11 @@ def kneserNey(unigrams, bigrams, continuation):
     totalBigramTypes = float(sum(continuation.itervalues()))
     newProbabilities = {}
 
-    for bigramToken, dictionaries in bigrams.iteritems():           #BigramToken is w_(i-1)
+    for bigramToken, _ in unigrams.iteritems():           #BigramToken is w_(i-1)
+        if bigramToken in bigrams:
+            dictionaries = bigrams[bigramData]
+        else:
+            dictionaries = {}
         newProbabilities[bigramToken] = {}
         countPrev = sum(dictionaries.itervalues())                  #Get the number of total bigrams, this is effectively a count of w_(i-1)
         lmbda = discount/ countPrev * len(dictionaries)             #Lambda = d / c(w_i-1) *
@@ -141,6 +145,12 @@ def kneserNey(unigrams, bigrams, continuation):
             newProbabilities[bigramToken][token] = discountedProbability + lmbda * continuationValue
   #  print(newProbabilities)
     return newProbabilities
+
+
+def addK(unigrams, bigrams):
+    for bigram in unigrams:
+        print(bigram)
+
 
 ## ===== PERPLEXITY ========================================================
 ##Expect modelData to be a dictionary of word: probability
