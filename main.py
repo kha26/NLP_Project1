@@ -150,7 +150,7 @@ def perplexity(testWords, trainedModel):
     for word in testWords:
         if word in trainedModel:
             logSum -= math.log(trainedModel[word])
-        else
+        else:
             logSum -= math.log(trainedModel['<unk>'])
     perplexity = math.exp(logSum/(float(n)))
     return perplexity
