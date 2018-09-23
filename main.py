@@ -2,8 +2,9 @@
 from collections import Counter
 import random
 import math
+import numpy as np
 
-startingWord = '<s>';
+startingWord = '.';
 endingWord = '.';
 unknownWord = '<unk>';
 
@@ -119,22 +120,22 @@ def convertUnkownWords(text):
 
 def addK(unigrams, bigrams, count):
     result = {}
-    print(unigrams)
     for first, _ in unigrams.iteritems():
         result[first] = {}
+        if first in bigrams:
+            dictionary = bigrams[first]
+        else:
+            dictionary = {}
         for second, _ in unigrams.iteritems():
-            if first in bigrams:
-                dictionary = bigrams[first]
-            else:
-                dictionary = {}
 
             if second in dictionary:
                 result[first][second] = dictionary[second]+count
             else:
                 result[first][second] = count
-        count = float(sum(result[first].values()))
+        counts = float(sum(result[first].values()))
         for value in result[first]:
-            result[first][value] = result[first][value]/count;
+            result[first][value] = result[first][value]/counts
+#    print(result)
     return result
 
 ##KneserNey Smoothing
@@ -164,6 +165,28 @@ def kneserNey(unigrams, bigrams, continuation):
 
 ## ===== PERPLEXITY ========================================================
 ##Expect modelData to be a dictionary of word: probability
+def fixedPerplexity(testWords, trainedModel):
+    logSum = 0
+    testWords = testWords.split()
+    n = len(testWords)
+    for i in range(n):
+        if i == 0:
+            first = '.'
+        else:
+            first = testWords[i-1]
+        second = testWords[i]
+        if (first in trainedModel) and (second in trainedModel[first]):
+            logSum -= math.log(trainedModel[first][second])
+        elif (first in trainedModel) and (not (second in trainedModel[first])):
+            logSum -= math.log(trainedModel[first]['<unk>'])
+        elif (not (first in trainedModel)) and (second in trainedModel['<unk>']):
+            logSum -= math.log(trainedModel['<unk>'][second])
+        elif (not (first in trainedModel)) and (not (second in trainedModel['<unk>'])):
+            logSum -= math.log(trainedModel['<unk>']['<unk>'])
+    perplexity = math.exp(logSum/(float(n)))
+    return perplexity
+
+
 def perplexity(testWords, trainedModel):
     logSum = 0
     n = len(testWords)
@@ -189,7 +212,7 @@ def evaluate(unigram, bigrams):
     print("BIGRAM: " + str(bigramPP))
 
 
-
+import sys
 if __name__ == '__main__':
     devFile = open('Assignment1_resources/development/obama.txt', 'r');
     trainFile = open('Assignment1_resources/train/obama.txt', 'r');
@@ -217,15 +240,21 @@ if __name__ == '__main__':
         #print(tableBigram)
 
 #Example
-        print(unigramData['.'])
-        print(bigramData['<s>'])
-        print(sum(bigramData['<s>'].values()))
+#        print(unigramData['.'])
+#        print(bigramData['<s>'])
+#        print(sum(bigramData['<s>'].values()))
 #        print(bigramData['.'])      #Fails here
 
         print('======Add-K=====')
         addOne = addK(unigramData, bigramData, 1)
+        pAddOne = fixedPerplexity(dev, addOne)
+        print(pAddOne)
+
+
         print('======Kneser-Ney======')
         kN = kneserNey(unigramData, bigramData, continuation)
+        pKN = fixedPerplexity(dev, kN)
+        print(pKN)
         #print(kN)      You definitely do not want to print this, perhaps pipe it out to a file instead.
         print('Done')
     else:
