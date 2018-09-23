@@ -148,7 +148,7 @@ def kneserNey(unigrams, bigrams, continuation):
 
     for bigramToken, dictionaries in bigrams.iteritems():           #BigramToken is w_(i-1)
         newProbabilities[bigramToken] = {}
-        countPrev = sum(dictionaries.itervalues())                  #Get the number of total bigrams, this is effectively a count of w_(i-1)
+        countPrev = sum(dictionaries.values())                  #Get the number of total bigrams, this is effectively a count of w_(i-1)
         lmbda = discount/ countPrev * len(dictionaries)             #Lambda = d / c(w_i-1) *
         for token in unigrams:                                      #We want to do this for every single token, because we want to give every single token some positive probability.
             if token in dictionaries:                               #If it's in the dictionary, then it has a value. Otherwise, its 0
@@ -220,7 +220,7 @@ if __name__ == '__main__':
         print(unigramData['.'])
         print(bigramData['<s>'])
         print(sum(bigramData['<s>'].values()))
-        print(bigramData['.'])      #Fails here
+#        print(bigramData['.'])      #Fails here
 
         print('======Add-K=====')
         addOne = addK(unigramData, bigramData, 1)
