@@ -198,18 +198,8 @@ def perplexity(testWords, trainedModel):
     perplexity = math.exp(logSum/(float(n)))
     return perplexity
 
-def flatten(bigrams):
-    flattenedBigrams = {}
-    for word, nextWordProbs in bigrams.items():
-        for nextWord, prob in nextWordProbs.items():
-            flattenedBigrams[nextWord] = prob
-    return flattenedBigrams
 
-def evaluate(unigram, bigrams):
-    unigramPP = perplexity(unigram)
-    bigramPP = perplexity(flatten(bigrams))
-    print("UNIGRAM: " + str(unigramPP))
-    print("BIGRAM: " + str(bigramPP))
+## ===== WORD EMBEDDEING ========================================================
 
 import sys
 if __name__ == '__main__':
