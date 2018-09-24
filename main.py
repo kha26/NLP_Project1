@@ -59,7 +59,7 @@ def bigramTable(data):
                 else:
                     continuation[word] = 1
 
-    return (wordCount, bigramData), continuation;
+    return wordCount, bigramData, continuation;
 
 def unigramProbTable(data):
     size = sum(data.values());
@@ -211,51 +211,70 @@ def evaluate(unigram, bigrams):
     print("UNIGRAM: " + str(unigramPP))
     print("BIGRAM: " + str(bigramPP))
 
-
 import sys
 if __name__ == '__main__':
-    devFile = open('Assignment1_resources/development/obama.txt', 'r');
-    trainFile = open('Assignment1_resources/train/obama.txt', 'r');
-    if trainFile.mode == 'r' and devFile.mode == 'r':
-        devText = devFile.read();
-        trainText = trainFile.read();
+    sys.stdout = open('submission.csv', 'w')
+    obamaTrainFile = open('Assignment1_resources/train/obama.txt', 'r')
+    trumpTrainFile = open('Assignment1_resources/train/trump.txt', 'r')
+    testSet = open('Assignment1_resources/test/test.txt', 'r')
+    obamadevSet = open('Assignment1_resources/development/obama.txt')
+    trumpDevset = open('Assignment1_resources/development/trump.txt')
 
-        dev = preprocessText(devText);
-        train = convertUnkownWords(preprocessText(trainText));
+    if obamaTrainFile.mode == 'r' and trumpTrainFile.mode == 'r' and testSet.mode == 'r':
+        obamaTrain = obamaTrainFile.read()
+        trumpTrain = trumpTrainFile.read()
+        test = testSet.read()
 
-        # contents = 'the students liked the assignment .';
+        obama = convertUnkownWords(preprocessText(obamaTrain))
+        obamaDev = preprocessText(obamadevSet.read())
 
-        # contents = preprocessText(devText);
+        obamaUnigramCount = unigramTable(obama)
+        obamaUnigramProbabilities = unigramProbTable(obamaUnigramCount)
+        obamaWordCount, obamaBigramData, obamaContinuation = bigramTable(obama)
+        obamaBigramProbabilities = bigramProbTable(obamaWordCount, obamaBigramData)
+        obamaKN = kneserNey(obamaUnigramCount, obamaBigramData, obamaContinuation)
 
-        print('========== UNIGRAM ========== ');
-        unigramData = unigramTable(train);
-        #print(unigramData)
-        tableUnigram = unigramProbTable(unigramData);
-        #print(tableUnigram)
+        trump = convertUnkownWords(preprocessText(trumpTrain))
+        trumpDev = preprocessText(trumpDevset.read())
+        trumpUnigramCount = unigramTable(trump)
+        trumpUnigramProbabilities = unigramProbTable(trumpUnigramCount)
+        trumpWordCount, trumpBigramData, trumpContinuation = bigramTable(trump)
+        trumpBigramProbabilities = bigramProbTable(trumpWordCount, trumpBigramData)
+        trumpKN = kneserNey(trumpUnigramCount, trumpBigramData, trumpContinuation)
 
-        print('========== BIGRAM  ========== ');
-        (wordCount, bigramData), continuation = bigramTable(train);
-        # print(bigramData)
-        tableBigram = bigramProbTable(wordCount, bigramData);
-        #print(tableBigram)
+        testArray = test.split("\n")
+        counter = 0
+        obamaCounter = 0
+        trumpCounter = 0
 
-#Example
-#        print(unigramData['.'])
-#        print(bigramData['<s>'])
-#        print(sum(bigramData['<s>'].values()))
-#        print(bigramData['.'])      #Fails here
-
-        print('======Add-K=====')
-        addOne = addK(unigramData, bigramData, 1)
-        pAddOne = fixedPerplexity(dev, addOne)
-        print(pAddOne)
+        perplexityObama = fixedPerplexity(obamaDev, obamaKN)
+        perplexityTrump = fixedPerplexity(trumpDev, trumpKN)
+        perplexityObamaTrump = fixedPerplexity(obamaDev, trumpKN)
+        perplexityTrumpObama = fixedPerplexity(trumpDev, obamaKN)
+   #     print(perplexityObama)
+  #      print(perplexityTrump)
+  #      print(perplexityObamaTrump)
+ #       print(perplexityTrumpObama)
 
 
-        print('======Kneser-Ney======')
-        kN = kneserNey(unigramData, bigramData, continuation)
-        pKN = fixedPerplexity(dev, kN)
-        print(pKN)
-        #print(kN)      You definitely do not want to print this, perhaps pipe it out to a file instead.
-        print('Done')
+        print('Id,Prediction')
+        for sentence in testArray:
+            if sentence == "":
+                break
+            sentence = preprocessText(sentence)
+            obamaPerp = fixedPerplexity(sentence, obamaKN)
+            trumpPerp = fixedPerplexity(sentence, trumpKN)
+            if obamaPerp < trumpPerp:
+                print(str(counter) + ',0')
+               # print('obama')
+                obamaCounter = obamaCounter + 1
+            else:
+                print(str(counter) + ',1')
+              #  print('trump')
+                trumpCounter = trumpCounter + 1
+            counter = counter + 1
+        print(obamaCounter)
+        print(trumpCounter)
+
     else:
         print('Something went wrong bro!');
