@@ -53,7 +53,7 @@ def cosineSimilarity(v1, v2):
     return cos;
 
 def writeResults(results):
-    with open('submission.csv', mode='w') as employee_file:
+    with open('submission_part8.csv', mode='w') as employee_file:
         result_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         result_writer.writerow(['Id', 'Prediction']);
         i = 0;
